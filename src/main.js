@@ -34,6 +34,7 @@ async function onSearchFormSubmit(event) {
     
     searchRes.innerHTML = '';
     loaderEl.classList.remove('is-hidden');
+    loadMoreBtnEl.classList.add('is-hidden');
 
 try {
     const imagesData = await fetchPhotoSearch(currentSearchQuery, currentPage)
@@ -51,7 +52,15 @@ try {
         captionDelay: 250,
         captionPosition: 'bottom',
     }).refresh();
-    loadMoreBtnEl.classList.remove('is-hidden');
+    if (imagesData.hits.length < 15) {
+        setTimeout(() => { iziToast.info({
+                title: 'Info',
+                message: "We're sorry, but you've reached the end of search results.",
+                position: 'topRight',
+            });}, 2000);
+        } else {
+            loadMoreBtnEl.classList.remove('is-hidden');
+        }
 } catch (error) {
     console.log(error);
 }
@@ -90,13 +99,14 @@ async function loadMoreImages() {
             captionPosition: 'bottom',
         }).refresh();
         
-          if (currentPage * 15 >= imagesData.totalHits) {
+          if (currentPage * 15 >= imagesData.totalHits|| imagesData.hits.length < 15) {
             loadMoreBtnEl.classList.add('is-hidden');
-            iziToast.info({
+            setTimeout(() => {iziToast.info({
                 title: 'Info',
                 message: "We're sorry, but you've reached the end of search results.",
                 position: 'topRight',
             });
+                }, 2000);
         }
         smoothScroll();
 
